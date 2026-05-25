@@ -23,6 +23,9 @@ export DOTFILES_ENABLED_FEATURES=(zsh git)
 # The root directory of the bareHub installation
 export BAREHUB_DIR="$BAREHUB_DIR"
 
+# Optional private overlay repository location
+export DOTFILES_OVERLAY_DIR="$HOME/git/dotfiles"
+
 # GCP secrets configuration (only used if 'secrets' feature is enabled)
 export DOTFILES_GCP_PROJECT="__YOUR_GCP_PROJECT__"
 export DOTFILES_GCP_BUCKET="__YOUR_GCP_BUCKET__"
@@ -158,9 +161,9 @@ if is_feature_enabled "antigravity"; then
 fi
 
 # Deploy Private Overlays if they exist
-if [[ -d "$HOME/git/dotfiles" ]]; then
-    echo "Private dotfiles overlay detected. Stowing..."
-    cd "$HOME/git/dotfiles"
+if [[ -n "$DOTFILES_OVERLAY_DIR" && -d "$DOTFILES_OVERLAY_DIR" ]]; then
+    echo "Private dotfiles overlay detected at $DOTFILES_OVERLAY_DIR. Stowing..."
+    cd "$DOTFILES_OVERLAY_DIR"
     
     if [[ -d "zsh-private" ]]; then
         stow -R -t ~ zsh-private

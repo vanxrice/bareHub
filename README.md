@@ -83,7 +83,7 @@ While `bareHub` manages the public, universal core environment, many users have 
 
 To solve this, `bareHub` natively supports a **Private Overlay Architecture**.
 
-If a secondary private repository exists at `~/git/dotfiles`, the Conductor will automatically detect it and perform a secondary Stow pass on overlay directories (e.g., `zsh-private` and `git-private`). 
+If a secondary private repository exists at the path defined by `$DOTFILES_OVERLAY_DIR` (defaults to `~/git/dotfiles`), the Conductor will automatically detect it and perform a secondary Stow pass on overlay directories (e.g., `zsh-private` and `git-private`). 
 
 ### Example Overlay Integration
 1. **Git Identity:** The public `bareHub` `.gitconfig` contains an `[include]` directive pointing to `~/.gitconfig.local`. Your private overlay can stow a `git-private/.gitconfig.local` containing your actual name and email.
