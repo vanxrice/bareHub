@@ -1,0 +1,9 @@
+# --- Repository Encryption Policies (git-crypt) ---
+
+# To secure a file, append the git-crypt filters.
+# Syntax: <file pattern> filter=git-crypt diff=git-crypt
+
+# Examples of sensitive files you might want to secure in the future:
+# *.key filter=git-crypt diff=git-crypt
+# *.pem filter=git-crypt diff=git-crypt
+# rectangle/Library/Preferences/com.knollsoft.RectanglePro.plist filter=git-crypt diff=git-crypt

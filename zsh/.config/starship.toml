@@ -1,0 +1,51 @@
+# --- Starship Prompt Configuration (Sleek Dark Theme) ---
+
+format = """
+[░▒▓](cyan)\
+$directory\
+[░▒▓](fg:cyan bg:blue)\
+$git_branch\
+$git_status\
+[░▒▓](fg:blue bg:purple)\
+$python\
+$gcloud\
+[░▒▓](fg:blue bg:bright-black)\
+$cmd_duration\
+[░▒▓](fg:bright-black)\
+\n$character"""
+
+# Disable the blank line at start of prompt
+add_newline = false
+
+[directory]
+style = "bg:cyan fg:black"
+format = "[ $path ]($style)"
+truncation_length = 3
+truncation_symbol = "…/"
+
+[git_branch]
+symbol = "🍣 "
+style = "bg:blue fg:black"
+format = "[ $symbol$branch ]($style)"
+
+[git_status]
+style = "bg:blue fg:black"
+format = "[ $all_status$ahead_behind]($style)"
+
+[python]
+symbol = "🐍 "
+style = "bg:purple fg:black"
+format = "[ $symbol$version ]($style)"
+
+[gcloud]
+symbol = "☁️ "
+style = "bg:purple fg:black"
+format = "[ $symbol$project ]($style)"
+
+[cmd_duration]
+style = "bg:bright-black fg:white"
+format = "[ ⏱ $duration ]($style)"
+
+[character]
+success_symbol = "[⚡](bold green) "
+error_symbol = "[💥](bold red) "

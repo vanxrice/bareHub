@@ -1,0 +1,26 @@
+# Local settings and overrides (MUST NOT be committed)
+.dotfiles.profile
+.zshrc.local
+.conductor.local
+*.local
+
+# System/IDE Files
+.DS_Store
+.antigravitycli/
+.idea/
+.vscode/
+
+# Exclude dynamic agent runtime files (if copied/present inside repository)
+**/history.jsonl
+**/brain/
+**/cache/
+**/conversations/
+**/implicit/
+**/knowledge/
+**/log/
+
+# Sensitive or credential files
+*.pem
+*.key
+id_*
+secrets*

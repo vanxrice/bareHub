@@ -1,0 +1,38 @@
+{
+  "enableTelemetry": false,
+  "model": "Gemini 3.5 Flash (Medium)",
+  "permissions": {
+    "allow": [
+      "command(git status)",
+      "command(git remote)",
+      "command(git diff)",
+      "command(ls)",
+      "command(grep)",
+      "command(brew --version)",
+      "command(stow)",
+      "command(./bin/conductor.sh)",
+      "command(command)",
+      "command(berglas)",
+      "command(find)",
+      "command(brew search)",
+      "command(pyenv)",
+      "command(which)",
+      "command(git add)",
+      "command(git commit)",
+      "command(git pull)",
+      "command(git rebase)"
+    ]
+  },
+  "trustedWorkspaces": [
+    "__HOME__/git/bareHub"
+  ],
+  "privacy": {
+    "sensitiveTerms": [
+      "__USER__"
+    ],
+    "replacementPlaceholders": {
+      "__USER__": "anonymized"
+    },
+    "description": "Rule for AGY: The term '__USER__' is a semi-private/secret username and must be dynamically sanitized, anonymized, or replaced in all public configurations, plists, and shared assets using placeholders like '__USER__' or '__HOME__'."
+  }
+}
