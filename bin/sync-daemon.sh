@@ -9,7 +9,8 @@ if ! command -v tailscale &>/dev/null || ! tailscale status &>/dev/null; then
     exit 0
 fi
 
-cd ~/git/bareHub
+BAREHUB_DIR=$(cd "$(dirname "$0")/.." && pwd)
+cd "$BAREHUB_DIR"
 
 # Ensure remote is configured
 if ! git remote get-url origin &>/dev/null; then
@@ -25,10 +26,16 @@ if [[ "$REMOTE_URL" =~ @([^:]+): ]]; then
         echo "iMac Hub server ($HOST) is unreachable. Skipping background sync."
         exit 0
     fi
+# If it is an HTTPS remote, check if we are offline or behind a captive portal
+elif [[ "$REMOTE_URL" =~ ^https:// ]]; then
+    if ! curl -s --max-time 3 -I "https://github.com" &>/dev/null; then
+        echo "Internet unreachable (offline or captive portal). Skipping background sync."
+        exit 0
+    fi
 fi
 
-# Fetch remote status silently
-git fetch origin main &>/dev/null
+# Fetch remote status silently (let errors flow to LaunchAgent logs)
+git fetch origin main
 
 LOCAL=$(git rev-parse HEAD)
 REMOTE=$(git rev-parse origin/main)
@@ -40,13 +47,13 @@ if [ "$LOCAL" = "$REMOTE" ]; then
 elif [ "$LOCAL" = "$BASE" ]; then
     # Local is behind remote: pull and boot
     echo "Local environment is out of date. Pulling..."
-    git pull origin main &>/dev/null
-    ./bin/conductor.sh &>/dev/null
+    git pull origin main
+    ./bin/conductor.sh
     osascript -e 'display notification "Your configurations have been automatically updated from the bareHub Hub." with title "bareHub Sync" sound name "Glass"'
 elif [ "$REMOTE" = "$BASE" ]; then
     # Local is ahead of remote: push to Hub
     echo "Local environment is ahead. Pushing changes..."
-    git push origin main &>/dev/null
+    git push origin main
     osascript -e 'display notification "Local environment changes have been quietly pushed to the bareHub Hub." with title "bareHub Sync"'
 else
     # Diverged: warn the user to resolve manually

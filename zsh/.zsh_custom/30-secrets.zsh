@@ -13,6 +13,12 @@ if [[ " ${DOTFILES_ENABLED_FEATURES[@]} " =~ " secrets " ]]; then
             export PROJECT_ID="${DOTFILES_GCP_PROJECT:-gen-lang-client-0329933647}"
             export BUCKET_ID="${DOTFILES_GCP_BUCKET:-key-secrets}"
             
+            # Use Pyenv python for gcloud if available
+            if command -v pyenv &>/dev/null; then
+                export CLOUDSDK_PYTHON="$(pyenv root)/versions/3.12.11/bin/python"
+            fi
+
+            
             # Fetch secrets
             export OPENCLAW_GATEWAY_TOKEN=$(berglas access ${BUCKET_ID}/OPENCLAW_GATEWAY_TOKEN 2>/dev/null)
         fi

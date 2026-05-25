@@ -19,3 +19,10 @@ fi
 
 # Antigravity CLI binary path configuration
 export PATH="$HOME/.local/bin:$PATH"
+
+# 4. Source private custom modules if they exist
+if [[ -d "$HOME/.zsh_custom_private" ]]; then
+    for module in "$HOME/.zsh_custom_private"/*.zsh(N); do
+        source "$module"
+    done
+fi

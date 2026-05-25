@@ -2,6 +2,9 @@
 
 # Sourced automatically. General utilities.
 
+# randopen: Opens a random selection of files with a specific extension
+# Usage: randopen [count] [extension]
+# Example: randopen 3 jpg
 randopen() {
   local count=${1:-1}
   local ext=${2:-mp4}
@@ -9,6 +12,9 @@ randopen() {
   find . -maxdepth 1 -type f -iname "*.$ext" | awk 'BEGIN{srand()} {print rand() "\t" $0}' | sort -n | cut -f2- | head -n "$count" | xargs -I "{}" open "{}"
 }
 
+# eachdir: Executes a given command inside every subdirectory in the current folder
+# Usage: eachdir <command> [args...]
+# Example: eachdir git pull
 eachdir() {
   if [[ -z "$1" ]]; then
     echo "Usage: eachdir <command> [args...]"
@@ -22,6 +28,9 @@ eachdir() {
   done
 }
 
+# organize_by_date: Moves files in the target directory into YYYY-MM-DD subfolders based on creation date
+# Usage: organize_by_date [target_dir]
+# Example: organize_by_date ~/Downloads
 organize_by_date() {
   local target_dir="${1:-.}"
   
@@ -55,53 +64,3 @@ organize_by_date() {
   echo "Organization complete."
 }
 
-knew() {
-  local n="${1:-5}"
-  local pat="${2:-*.{png,jpg,jpeg,gif,webp,svg}}"
-  # If user passed plain ext like "png", convert to glob
-  if [[ "$pat" != *"*"* && "$pat" != *"{"* && "$pat" != *","* ]]; then
-    pat="*.${pat}"
-  fi
-
-  # Use brace expansion if available, otherwise fallback
-  local -a candidates=()
-  if [[ "$pat" == *"{"*"}"* ]]; then
-    eval "candidates=( $pat )"
-  else
-    for f in $pat; do
-      [ -f "$f" ] && candidates+=("$f")
-    done
-    if [ ${#candidates[@]} -eq 0 ] && [[ "$pat" == "*."* || "$pat" == "*"{* ]]; then
-      for ext in png jpg jpeg gif webp svg; do
-        for f in *."$ext"; do
-          [ -f "$f" ] && candidates+=("$f")
-        done
-      done
-    fi
-  fi
-
-  if [ ${#candidates[@]} -eq 0 ]; then
-    echo "knew: no matches for pattern '$pat' in $(pwd)"; return 1
-  fi
-
-  # Get mtimes (macOS stat) and sort newest first
-  IFS=$'\n' sorted=( $(for f in "${candidates[@]}"; do
-    mtime=$(stat -f %m -- "$f" 2>/dev/null || stat -c %Y -- "$f" 2>/dev/null)
-    printf '%s\t%s\n' "$mtime" "$f"
-  done | sort -rn -k1,1 | awk -F'\t' '{print $2}' | head -n "$n") )
-  unset IFS
-
-  if [ ${#sorted[@]} -eq 0 ]; then
-    echo "knew: no files after sorting"; return 1
-  fi
-
-  printf 'knew: showing %d file(s):\n' "${#sorted[@]}"
-  for x in "${sorted[@]}"; do printf '%s\n' "$x"; done
-
-  if command -v kitty &>/dev/null; then
-    kitty +kitten icat --transfer-mode=stream --clear "${sorted[@]}"
-  else
-    # Fallback to standard open command on non-Kitty systems
-    open "${sorted[@]}"
-  fi
-}

@@ -3,7 +3,9 @@
 
 set -e # Exit immediately if a command fails
 
-echo "Starting bareHub Conductor sequence..."
+BAREHUB_DIR=$(cd "$(dirname "$0")/.." && pwd)
+
+echo "Starting bareHub Conductor sequence from $BAREHUB_DIR..."
 
 # 1. Handle unified dotfiles profile toggles
 PROFILE_FILE="$HOME/.dotfiles.profile"
@@ -17,6 +19,9 @@ if [[ ! -f "$PROFILE_FILE" ]]; then
 # Core features: zsh, git
 # Optional features: secrets (berglas/gcloud), kitty, rectangle
 export DOTFILES_ENABLED_FEATURES=(zsh git)
+
+# The root directory of the bareHub installation
+export BAREHUB_DIR="$BAREHUB_DIR"
 
 # GCP secrets configuration (only used if 'secrets' feature is enabled)
 export DOTFILES_GCP_PROJECT="__YOUR_GCP_PROJECT__"
@@ -103,7 +108,17 @@ fi
 
 # 5. Deploy Dotfiles via Stow
 echo "Symlinking configurations..."
-cd ~/git/bareHub
+cd "$BAREHUB_DIR"
+
+# Backup physical dotfiles to prevent Stow collisions on fresh machines
+for file in ".zshrc" ".gitconfig"; do
+    if [[ -f "$HOME/$file" && ! -L "$HOME/$file" ]]; then
+        echo "Collision detected: Backing up physical $file to ${file}.barehub.bak"
+        mv "$HOME/$file" "$HOME/${file}.barehub.bak"
+    fi
+done
+
+
 
 # Core deployments
 stow -R -t ~ zsh
@@ -123,24 +138,41 @@ fi
 if is_feature_enabled "antigravity"; then
     echo "Antigravity Agent Sync enabled..."
     # Ensure repository folder structure exists
-    mkdir -p ~/git/bareHub/antigravity/.gemini/antigravity-cli
+    mkdir -p "$BAREHUB_DIR/antigravity/.gemini/antigravity-cli"
 
     # Capture existing settings.json if it is a physical file (not a symlink)
     if [[ -f "$HOME/.gemini/antigravity-cli/settings.json" && ! -L "$HOME/.gemini/antigravity-cli/settings.json" ]]; then
         echo "Capturing local settings.json configuration..."
-        mv "$HOME/.gemini/antigravity-cli/settings.json" ~/git/bareHub/antigravity/.gemini/antigravity-cli/
+        mv "$HOME/.gemini/antigravity-cli/settings.json" "$BAREHUB_DIR/antigravity/.gemini/antigravity-cli/"
     fi
 
     # Capture existing keybindings.json if it is a physical file (not a symlink)
     if [[ -f "$HOME/.gemini/antigravity-cli/keybindings.json" && ! -L "$HOME/.gemini/antigravity-cli/keybindings.json" ]]; then
         echo "Capturing local keybindings.json configuration..."
-        mv "$HOME/.gemini/antigravity-cli/keybindings.json" ~/git/bareHub/antigravity/.gemini/antigravity-cli/
+        mv "$HOME/.gemini/antigravity-cli/keybindings.json" "$BAREHUB_DIR/antigravity/.gemini/antigravity-cli/"
     fi
 
     # Deploy symlinks via Stow
     echo "Stowing Antigravity configurations..."
     stow -R -t ~ antigravity
 fi
+
+# Deploy Private Overlays if they exist
+if [[ -d "$HOME/git/dotfiles" ]]; then
+    echo "Private dotfiles overlay detected. Stowing..."
+    cd "$HOME/git/dotfiles"
+    
+    if [[ -d "zsh-private" ]]; then
+        stow -R -t ~ zsh-private
+    fi
+    if [[ -d "git-private" ]]; then
+        stow -R -t ~ git-private
+    fi
+    
+    # Return to bareHub for remaining operations
+    cd "$BAREHUB_DIR"
+fi
+
 
 # 6. Bootstrapping LaunchAgent
 if is_feature_enabled "launchagent"; then
@@ -152,8 +184,8 @@ if is_feature_enabled "launchagent"; then
     # Unload if already loaded to ensure fresh registration
     launchctl bootout "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.barehub.sync.plist" 2>/dev/null || true
     
-    # Dynamically instantiate the plist from template, replacing __HOME__ placeholder
-    sed "s|__HOME__|$HOME|g" "$HOME/git/bareHub/templates/com.barehub.sync.plist" > "$HOME/Library/LaunchAgents/com.barehub.sync.plist"
+    # Dynamically instantiate the plist from template, replacing placeholders
+    sed -e "s|__HOME__|$HOME|g" -e "s|__BAREHUB_DIR__|$BAREHUB_DIR|g" "$BAREHUB_DIR/templates/com.barehub.sync.plist" > "$HOME/Library/LaunchAgents/com.barehub.sync.plist"
     chmod 644 "$HOME/Library/LaunchAgents/com.barehub.sync.plist"
 
     # Register/Load the new LaunchAgent

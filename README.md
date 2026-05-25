@@ -73,6 +73,23 @@ A major tenet of `bareHub` is **zero leakage of private credentials, API tokens,
 * **Dynamic Home Path Substitution**: The background sync LaunchAgent template contains `__HOME__` placeholders. The `conductor.sh` bootstrapper dynamically instantiates a non-symlinked, localized version (`~/Library/LaunchAgents/com.barehub.sync.plist`) during installation. This protects your private username (`/Users/__USER__`) from git history.
 * **GCP Secrets Integration**: Active production secrets are stored in GCP Bucket Storage and resolved at shell startup using `berglas` IAM authentication. No raw passwords or API keys are ever committed to Git.
 * **Fallback Degradation**: Custom Zsh modules check for the presence of CLI tools (`gcloud`, `pyenv`, `rustup`) and degrade silently if they are missing, ensuring error-free shell load on minimal machines.
+* **Dynamic Bootstrapper Resolution**: `conductor.sh` dynamically resolves its execution path (`$BAREHUB_DIR`), allowing users to clone the framework anywhere without breaking paths.
+
+---
+
+## 🎭 The Private Overlay Architecture
+
+While `bareHub` manages the public, universal core environment, many users have highly personal or proprietary configurations (private aliases, work-specific tools, personal Git identities) that should never touch a public repository. 
+
+To solve this, `bareHub` natively supports a **Private Overlay Architecture**.
+
+If a secondary private repository exists at `~/git/dotfiles`, the Conductor will automatically detect it and perform a secondary Stow pass on overlay directories (e.g., `zsh-private` and `git-private`). 
+
+### Example Overlay Integration
+1. **Git Identity:** The public `bareHub` `.gitconfig` contains an `[include]` directive pointing to `~/.gitconfig.local`. Your private overlay can stow a `git-private/.gitconfig.local` containing your actual name and email.
+2. **Private Aliases:** The public `.zshrc` automatically sources anything found in `~/.zsh_custom_private`. Your private overlay can stow a `zsh-private/.zsh_custom_private/private-aliases.zsh` to silently inject proprietary toolpaths (like `antigravity` SDK paths) or work VPN aliases into the public environment.
+
+This architecture ensures a strict separation of concerns: `bareHub` handles the public routing, while your private `dotfiles` handles the proprietary secrets.
 
 ---
 

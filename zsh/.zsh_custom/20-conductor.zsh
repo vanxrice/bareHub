@@ -3,7 +3,7 @@
 # Sourced automatically. Provides Git synchronization utility functions.
 
 sync-barehub() {
-    cd ~/git/bareHub
+    cd "${BAREHUB_DIR:-$HOME/git/bareHub}"
     git add .
     git commit -m "bareHub update: $(date +'%Y-%m-%d %H:%M')"
     git push origin main
@@ -12,7 +12,7 @@ sync-barehub() {
 }
 
 pull-barehub() {
-    cd ~/git/bareHub
+    cd "${BAREHUB_DIR:-$HOME/git/bareHub}"
     git pull origin main
     ./bin/conductor.sh
     cd - >/dev/null

@@ -7,7 +7,7 @@
     <key>ProgramArguments</key>
     <array>
         <string>/bin/bash</string>
-        <string>__HOME__/git/bareHub/bin/sync-daemon.sh</string>
+        <string>__BAREHUB_DIR__/bin/sync-daemon.sh</string>
     </array>
     <key>StartInterval</key>
     <integer>3600</integer>

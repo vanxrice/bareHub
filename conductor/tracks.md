@@ -16,3 +16,4 @@
 | conductor-consolidation | Unify fragmented Conductor tracks from legacy directories. | [conductor-consolidation](./tracks/conductor-consolidation/index.md) | Initialized |
 | gemini-extension-sync | Synchronize Gemini-CLI extensions across environments. | [gemini-extension-sync](./tracks/gemini-extension-sync/index.md) | Initialized |
 | antigravity-agent-sync | Synchronize Google Antigravity SDK global agent settings and keybindings. | [antigravity-agent-sync](./tracks/antigravity-agent-sync/index.md) | Completed |
+| bootstrap-resilience | Improve robustness, collision handling, and logging of the conductor and sync loops. | [bootstrap-resilience](./tracks/bootstrap-resilience/index.md) | Completed |
